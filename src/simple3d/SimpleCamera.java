@@ -24,7 +24,8 @@ public class SimpleCamera extends PerspectiveCamera {
         super(true);
         this.xRotate = new Rotate(0, 0, 0, 0, Rotate.X_AXIS);
         this.yRotate = new Rotate(0, 0, 0, 0, Rotate.Y_AXIS);
-        this.target = Point3D.ZERO;
+        //default target is at infinity along Z to simulate no target
+        this.target = Rotate.Z_AXIS.multiply(Math.pow(10, 10)); 
         this.getTransforms().addAll(this.xRotate, this.yRotate);
     }
 
@@ -42,6 +43,8 @@ public class SimpleCamera extends PerspectiveCamera {
         double xRotation = Math.toDegrees(Math.asin(-forward.getY()));
         double yRotation = Math.toDegrees(Math.atan2(forward.getX(), forward.getZ()));
 
+        //must set xRotate axis for the correct rotation to follow
+        this.xRotate.setAxis(getRight());
         this.xRotate.setAngle(xRotation);
         this.yRotate.setAngle(yRotation);
     }
@@ -72,21 +75,27 @@ public class SimpleCamera extends PerspectiveCamera {
     }
 
     public Point3D getUp() {
+        //return Rotate.Y_AXIS.multiply(-1);
         return getRight().crossProduct(getForward()).normalize();
     }
 
-    public void moveRight(double value) {
+    public void moveRight(double value) {    
         setPosition(getPosition().add(getRight().multiply(value)));
+        this.xRotate.setAxis(getRight());
         lookAtTarget();
     }
 
     public void moveUp(double value) {
-        setPosition(getPosition().add(getUp().multiply(value)));
-        lookAtTarget();
+        //upper and lower bounds for up/down
+        if ((value > 0 && this.xRotate.getAngle() > -80) || (value < 0 && this.xRotate.getAngle() < 80)) {
+            setPosition(getPosition().add(getUp().multiply(value)));
+            lookAtTarget();
+        }
     }
 
     public void reset() {
         this.setPosition(Point3D.ZERO);
+        this.xRotate.setAxis(Rotate.X_AXIS);
         this.xRotate.setAngle(0);
         this.yRotate.setAngle(0);
     }

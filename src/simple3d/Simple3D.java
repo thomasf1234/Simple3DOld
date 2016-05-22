@@ -65,7 +65,7 @@ public class Simple3D extends Application {
         Scene scene = new Scene(root, 600, 400, true, SceneAntialiasing.BALANCED);
         SimpleCamera camera = new SimpleCamera();
 
-        scene.setFill(Color.WHITE);
+        scene.setFill(Color.GREY);
         camera.setNearClip(0.1);
         camera.setFarClip(1000.0);
         camera.setTranslateX(0);
@@ -127,6 +127,9 @@ public class Simple3D extends Application {
                 SimpleCamera camera = (SimpleCamera) scene.getCamera();
 
                 switch (event.getCode()) {
+                    case L:
+                        camera.lookAtTarget();
+                        break;
                     case F:
                         camera.moveForward(3);
                         break;
@@ -191,6 +194,7 @@ public class Simple3D extends Application {
                     Node selectedNode = event.getPickResult().getIntersectedNode();
                     if (selectedNode != null) {
                         camera.setTarget(selectedNode.getTranslateX(), selectedNode.getTranslateY(), selectedNode.getTranslateZ());
+                        camera.lookAtTarget();
                     }
                 }
             }
