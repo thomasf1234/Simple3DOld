@@ -15,6 +15,8 @@ import javafx.scene.transform.Rotate;
  */
 public class SimpleCamera extends PerspectiveCamera {
 
+    private static final int UPPER_ROTATE_BOUND = 80;
+    private static final double NEAR_INFINITY = Math.pow(10, 10);
     public final Rotate xRotate;
     public final Rotate yRotate;
     private Point3D target;
@@ -25,7 +27,7 @@ public class SimpleCamera extends PerspectiveCamera {
         this.xRotate = new Rotate(0, 0, 0, 0, Rotate.X_AXIS);
         this.yRotate = new Rotate(0, 0, 0, 0, Rotate.Y_AXIS);
         //default target is at infinity along Z to simulate no target
-        this.target = Rotate.Z_AXIS.multiply(Math.pow(10, 10)); 
+        this.target = Rotate.Z_AXIS.multiply(NEAR_INFINITY); 
         this.getTransforms().addAll(this.xRotate, this.yRotate);
     }
 
@@ -35,6 +37,10 @@ public class SimpleCamera extends PerspectiveCamera {
 
     public void setTarget(double x, double y, double z) {
         this.target = new Point3D(x, y, z);
+    }
+    
+    public void removeTarget() {
+        setTarget(getForward().multiply(NEAR_INFINITY));
     }
 
     public void lookAtTarget() {
@@ -87,7 +93,7 @@ public class SimpleCamera extends PerspectiveCamera {
 
     public void moveUp(double value) {
         //upper and lower bounds for up/down
-        if ((value > 0 && this.xRotate.getAngle() > -80) || (value < 0 && this.xRotate.getAngle() < 80)) {
+        if ((value > 0 && this.xRotate.getAngle() > -UPPER_ROTATE_BOUND) || (value < 0 && this.xRotate.getAngle() < UPPER_ROTATE_BOUND)) {
             setPosition(getPosition().add(getUp().multiply(value)));
             lookAtTarget();
         }

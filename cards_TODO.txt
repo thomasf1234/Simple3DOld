@@ -1,0 +1,36 @@
+camera:
+ properties:
+  private Point3D target
+  private xRotate
+  private yRotate
+  private
+ methods:
+  getTarget();
+  setTarget(target)
+  removeTarget()
+  relativeDisplace(double forward, double right, double up)
+
+
+
+
+cards
+1.
+show object centre in simplescene
+show gridlines
+show rotate/displacement options
+show highlight/hover
+
+2.
+organize correct MVC structure
+- SimpleScen (draw this out on page)
+
+3.
+option to load save scene,
+import object/scene
+export object
+
+4.
+add material to SimpleObj xml, and texture path
+
+5. 
+develop testing framework
