@@ -9,20 +9,15 @@ import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Bounds;
 import javafx.geometry.Orientation;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.PointLight;
 import javafx.scene.Scene;
-import javafx.scene.SceneAntialiasing;
 import javafx.scene.SubScene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ToolBar;
-import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -32,9 +27,7 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
 import javafx.scene.shape.CullFace;
 import javafx.scene.shape.DrawMode;
-import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.TriangleMesh;
 import javafx.stage.Stage;
 import simpleobj.ObjModelXML;
@@ -46,94 +39,60 @@ public class Simple3D extends Application {
     private double mouseXOld = 0;
     private double mouseYOld = 0;
     private Group root;
-    private Canvas canvas;
 
     @Override
     public void start(Stage primaryStage) {
         //TriangleMesh pyramidMesh = new TriangleMesh();
-        SimpleObj mesh = null;
+        SimpleObj pyramid = null;
         try {
-            mesh = ObjModelXML.read("src\\simple3d\\Suzanne.xml").toSimpleObj();
+            pyramid = ObjModelXML.read("src\\simple3d\\Suzanne.xml").toSimpleObj();
         } catch (Exception ex) {
             System.out.println(ex);
             Logger.getLogger(Simple3D.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        final MeshView pyramid = new MeshView(mesh);
-        pyramid.setCullFace(CullFace.BACK);
-        pyramid.setDrawMode(DrawMode.FILL);
-        PhongMaterial material1 = new PhongMaterial();
-        material1.setDiffuseColor(Color.BLUE);
-        material1.setSpecularColor(Color.LIGHTBLUE);
-        material1.setSpecularPower(10.0);
-        pyramid.setMaterial(material1);
         pyramid.setTranslateX(0);
         pyramid.setTranslateY(0);
         pyramid.setTranslateZ(100);
         pyramid.setScaleX(10);
         pyramid.setScaleY(10);
         pyramid.setScaleZ(10);
-        
-       
 
         this.root = new Group();
-        this.canvas = new Canvas(600, 400);
 
         root.getChildren().add(pyramid); //http://www.developer.com/java/other/understanding-3d-graphics-in-java.html
-         root.getChildren().add(canvas);
         buildAxes(root);
 
-        
-        final SimpleCamera camera = new SimpleCamera();
-
-        
-        camera.setNearClip(0.1);
-        camera.setFarClip(1000.0);
-        camera.setTranslateX(0);
-        camera.setTranslateY(0);
-        camera.setTranslateZ(0);
-
-        //Scene scene = new Scene(root, 600, 400, true, SceneAntialiasing.BALANCED);
-        SubScene subScene = new SubScene(root, 600, 400, true, SceneAntialiasing.BALANCED);
-    subScene.setFill(Color.LIGHTGREY);
-    subScene.setCamera(camera);
-    //scene.setFill(Color.GREY);
-        //scene.setCamera(camera);
+        final SimpleScene simpleScene = new SimpleScene(root, 600, 400);
 //http://www.centigrade.de/blog/wp-content/uploads/SurfaceFunctions_013.png
 
-        handleKeyboard(subScene);
-        setMouseEvents(subScene);
-        
-        
-        
+        handleKeyboard(simpleScene);
+        setMouseEvents(simpleScene);
+
         //
         BorderPane pane = new BorderPane();
-    pane.setCenter(subScene);
-    Button button = new Button("Reset");
-    button.setOnAction(new EventHandler<ActionEvent>() {
+        pane.setCenter(simpleScene);
+        Button button = new Button("Reset");
+        button.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-              camera.reset();   
+                ((SimpleCamera) (simpleScene.getCamera())).reset();
             }
-    });
-    final CheckBox checkBox = new CheckBox("Wireframe");
-    checkBox.setOnAction(new EventHandler<ActionEvent>() {
+        });
+        final CheckBox checkBox = new CheckBox("Wireframe");
+        checkBox.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-              pyramid.setDrawMode(checkBox.isSelected()?DrawMode.LINE:DrawMode.FILL);  
+                //pyramid.setDrawMode(checkBox.isSelected() ? DrawMode.LINE : DrawMode.FILL);
             }
-    });
-    
-    
-    ToolBar toolBar = new ToolBar(button, checkBox);
-    toolBar.setOrientation(Orientation.VERTICAL);
-    pane.setRight(toolBar);
-    pane.setPrefSize(600,400);
+        });
 
-    Scene scene = new Scene(pane);
-        //
-        
-        
+        ToolBar toolBar = new ToolBar(button, checkBox);
+        toolBar.setOrientation(Orientation.VERTICAL);
+        pane.setRight(toolBar);
+        pane.setPrefSize(600, 400);
+
+        Scene scene = new Scene(pane);
 
         primaryStage.setResizable(false);
         primaryStage.setTitle("Simple3D");
@@ -256,49 +215,45 @@ public class Simple3D extends Application {
                         camera.setTarget(selectedNode.getTranslateX(), selectedNode.getTranslateY(), selectedNode.getTranslateZ());
                         camera.lookAtTarget();
                     }
-                } else if (event.getEventType() == MouseEvent.MOUSE_ENTERED_TARGET && 3 == 4) {
-Node selectedNode = event.getPickResult().getIntersectedNode();
+                } else if (event.getEventType() == MouseEvent.MOUSE_ENTERED_TARGET && 8 == 9) {
+                    Node selectedNode = event.getPickResult().getIntersectedNode();
 //((MeshView) selectedNode).setDrawMode(DrawMode.LINE);
-MeshView selectedObject = ((MeshView) selectedNode);
-TriangleMesh mesh =     (TriangleMesh) selectedObject.getMesh();
-TriangleMesh cloneMesh = new TriangleMesh();
-cloneMesh.getPoints().addAll(mesh.getPoints());
-cloneMesh.getTexCoords().addAll(mesh.getTexCoords());
-cloneMesh.getFaces().addAll(mesh.getFaces());
-MeshView clone = new MeshView(mesh);
-        clone.setCullFace(CullFace.FRONT);
-        clone.setDrawMode(DrawMode.FILL);
-        PhongMaterial material = new PhongMaterial();
-        material.setDiffuseColor(Color.PINK);
-        material.setSpecularColor(Color.PINK);
-        material.setSpecularPower(-100.0);
-        clone.setMaterial(material);
-        clone.setTranslateX(selectedObject.getTranslateX());
-        clone.setTranslateY(selectedObject.getTranslateY());
-        clone.setTranslateZ(selectedObject.getTranslateZ());
-        clone.setScaleX(11);
-        clone.setScaleY(11);
-        clone.setScaleZ(11);
-        PointLight light = new PointLight();
-    light.setColor(Color.WHITE);
-    light.setTranslateX(selectedObject.getTranslateX());
-        light.setTranslateY(selectedObject.getTranslateY());
-        light.setTranslateZ(selectedObject.getTranslateZ());
-        root.getChildren().addAll(clone, light);    
-        
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-         gc.setFill(Color.GREEN);
-        gc.setStroke(Color.RED);
-        gc.setLineWidth(1);
-        //http://stackoverflow.com/questions/28628702/javafx-2d-part-in-3d-application
+                    MeshView selectedObject = ((MeshView) selectedNode);
+                    TriangleMesh mesh = (TriangleMesh) selectedObject.getMesh();
+                    TriangleMesh cloneMesh = new TriangleMesh();
+                    cloneMesh.getPoints().addAll(mesh.getPoints());
+                    cloneMesh.getTexCoords().addAll(mesh.getTexCoords());
+                    cloneMesh.getFaces().addAll(mesh.getFaces());
+                    MeshView clone = new MeshView(mesh);
+                    clone.setCullFace(CullFace.FRONT);
+                    clone.setDrawMode(DrawMode.FILL);
+                    PhongMaterial material = new PhongMaterial();
+                    material.setDiffuseColor(Color.PINK);
+                    material.setSpecularColor(Color.PINK);
+                    material.setSpecularPower(-100.0);
+                    clone.setMaterial(material);
+                    clone.setTranslateX(selectedObject.getTranslateX());
+                    clone.setTranslateY(selectedObject.getTranslateY());
+                    clone.setTranslateZ(selectedObject.getTranslateZ());
+                    clone.setScaleX(11);
+                    clone.setScaleY(11);
+                    clone.setScaleZ(11);
+                    PointLight light = new PointLight();
+                    light.setColor(Color.WHITE);
+                    light.setTranslateX(selectedObject.getTranslateX());
+                    light.setTranslateY(selectedObject.getTranslateY());
+                    light.setTranslateZ(selectedObject.getTranslateZ());
+                    root.getChildren().addAll(clone, light);
+
  
-        Bounds bounds = event.getPickResult().getIntersectedNode().getLayoutBounds();
-        gc.strokeRect(bounds.getMaxX(), bounds.getMaxY(), bounds.getWidth(), bounds.getHeight());
-        
-        
+                    //http://stackoverflow.com/questions/28628702/javafx-2d-part-in-3d-application
+
+//                    Bounds bounds = event.getPickResult().getIntersectedNode().getLayoutBounds();
+//                    gc.strokeRect(bounds.getMaxX(), bounds.getMaxY(), bounds.getWidth(), bounds.getHeight());
+
                 } else if (event.getEventType() == MouseEvent.MOUSE_MOVED) {
                     scene.requestFocus();
-                    
+
                 }
             }
         };

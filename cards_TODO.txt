@@ -24,6 +24,16 @@ show highlight/hover
 organize correct MVC structure
 - SimpleScen (draw this out on page)
 
+StageEditor - manages subscene transistions and look of stage 
+stageEditor.clearStage()
+stageEditor.setUp()
+stageEditor.setSimpleScene(SimpleScene simpleScene, x, y, width, height) //adds the event handlers 
+stageEditor.resizeSimpleScene(0, 0 50, 60)
+
+SimpleScene:
+  methods:
+    getSimpleObjs()
+
 3.
 option to load save scene,
 import object/scene
