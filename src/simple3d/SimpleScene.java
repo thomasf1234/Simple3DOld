@@ -5,7 +5,9 @@
  */
 package simple3d;
 
+import javafx.geometry.Point3D;
 import javafx.scene.Group;
+import javafx.scene.ParallelCamera;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.SubScene;
 import javafx.scene.paint.Color;
@@ -16,16 +18,17 @@ import javafx.scene.paint.Color;
  */
 public class SimpleScene extends SubScene {
 
-    public SimpleScene(Group group, int width, int height) {
-        super(group, width, height, true, SceneAntialiasing.BALANCED);
+    private CameraMan cameraMan;
+    
+    public SimpleScene(Group root, int width, int height) {
+        super(root, width, height, true, SceneAntialiasing.BALANCED);
         setFill(Color.LIGHTGREY);
-        SimpleCamera camera = new SimpleCamera();
-        setCamera(camera);
-        camera.setNearClip(0.1);
-        camera.setFarClip(1000.0);
-        camera.setTranslateX(0);
-        camera.setTranslateY(0);
-        camera.setTranslateZ(0);
+        this.cameraMan = new CameraMan(this);
+        this.cameraMan.setPosition(Point3D.ZERO);
+    }
+    
+    public CameraMan getCameraMan() {
+        return this.cameraMan;
     }
 
 }

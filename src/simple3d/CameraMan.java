@@ -6,29 +6,36 @@
 package simple3d;
 
 import javafx.geometry.Point3D;
+import javafx.scene.Camera;
+import javafx.scene.ParallelCamera;
 import javafx.scene.PerspectiveCamera;
+import javafx.scene.SubScene;
 import javafx.scene.transform.Rotate;
 
 /**
  *
  * @author ad
  */
-public class SimpleCamera extends PerspectiveCamera {
+public class CameraMan {
 
     private static final int UPPER_ROTATE_BOUND = 80;
     private static final double NEAR_INFINITY = Math.pow(10, 10);
     public final Rotate xRotate;
     public final Rotate yRotate;
     private Point3D target;
+    private Camera camera;
+    private double x;
+    private double y;
+    private double z;
+    private SubScene scene;
 
-    public SimpleCamera() {
-        //centre of the window is origin of coordincate system
-        super(true);
+    public CameraMan(SubScene scene) {
+        this.scene = scene;
         this.xRotate = new Rotate(0, 0, 0, 0, Rotate.X_AXIS);
         this.yRotate = new Rotate(0, 0, 0, 0, Rotate.Y_AXIS);
         //default target is at infinity along Z to simulate no target
-        this.target = Rotate.Z_AXIS.multiply(NEAR_INFINITY); 
-        this.getTransforms().addAll(this.xRotate, this.yRotate);
+        this.target = Rotate.Z_AXIS.multiply(NEAR_INFINITY);
+        setPerspective(true);
     }
 
     public void setTarget(Point3D target) {
@@ -38,12 +45,12 @@ public class SimpleCamera extends PerspectiveCamera {
     public void setTarget(double x, double y, double z) {
         this.target = new Point3D(x, y, z);
     }
-    
+
     public void removeTarget() {
         setTarget(getForward().multiply(NEAR_INFINITY));
     }
 
-    public void lookAtTarget() {
+    public void faceTarget() {
         Point3D forward = getForward();
 
         double xRotation = Math.toDegrees(Math.asin(-forward.getY()));
@@ -56,18 +63,32 @@ public class SimpleCamera extends PerspectiveCamera {
     }
 
     public Point3D getPosition() {
-        return new Point3D(getTranslateX(), getTranslateY(), getTranslateZ());
+        return new Point3D(this.x, this.y, this.z);
     }
 
     public void setPosition(Point3D position) {
-        this.setTranslateX(position.getX());
-        this.setTranslateY(position.getY());
-        this.setTranslateZ(position.getZ());
+        this.x = position.getX();
+        this.y = position.getY();
+        this.z = position.getZ();
+        setCameraPosition();
+    }
+
+    public void setPosition(double x, double y, double z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        setCameraPosition();
+    }
+
+    private void setCameraPosition() {
+        this.camera.setTranslateX(this.x);
+        this.camera.setTranslateY(this.y);
+        this.camera.setTranslateZ(this.z);
     }
 
     public void moveForward(double value) {
         setPosition(getPosition().add(getForward().multiply(value)));
-        lookAtTarget();
+        faceTarget();
     }
 
     //returns unit vector towards target
@@ -85,17 +106,17 @@ public class SimpleCamera extends PerspectiveCamera {
         return getRight().crossProduct(getForward()).normalize();
     }
 
-    public void moveRight(double value) {    
+    public void moveRight(double value) {
         setPosition(getPosition().add(getRight().multiply(value)));
         this.xRotate.setAxis(getRight());
-        lookAtTarget();
+        faceTarget();
     }
 
     public void moveUp(double value) {
         //upper and lower bounds for up/down
         if ((value > 0 && this.xRotate.getAngle() > -UPPER_ROTATE_BOUND) || (value < 0 && this.xRotate.getAngle() < UPPER_ROTATE_BOUND)) {
             setPosition(getPosition().add(getUp().multiply(value)));
-            lookAtTarget();
+            faceTarget();
         }
     }
 
@@ -104,5 +125,23 @@ public class SimpleCamera extends PerspectiveCamera {
         this.xRotate.setAxis(Rotate.X_AXIS);
         this.xRotate.setAngle(0);
         this.yRotate.setAngle(0);
+    }
+
+    public void setPerspective(boolean isPerspective) {
+        if (isPerspective) {
+            this.camera = new PerspectiveCamera(true);
+            this.camera.setNearClip(0.1);
+            this.camera.setFarClip(100000.0);
+        } else {
+            this.camera = new ParallelCamera();
+        }
+
+        this.camera.getTransforms().addAll(this.xRotate, this.yRotate);
+        this.scene.setCamera(this.camera);
+        setCameraPosition();
+    }
+    
+    public boolean hasPerspectiveCamera() {
+      return this.camera instanceof PerspectiveCamera;
     }
 }

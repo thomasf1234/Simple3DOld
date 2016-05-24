@@ -14,7 +14,6 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.PointLight;
 import javafx.scene.Scene;
-import javafx.scene.SubScene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ToolBar;
@@ -76,7 +75,7 @@ public class Simple3D extends Application {
         button.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                ((SimpleCamera) (simpleScene.getCamera())).reset();
+                simpleScene.getCameraMan().reset();
             }
         });
         final CheckBox checkBox = new CheckBox("Wireframe");
@@ -136,40 +135,44 @@ public class Simple3D extends Application {
         root.getChildren().addAll(xAxis, yAxis, zAxis);
     }
 
-    private void handleKeyboard(final SubScene scene) {
-        scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+    private void handleKeyboard(final SimpleScene simpleScene) {
+        simpleScene.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
-                SimpleCamera camera = (SimpleCamera) scene.getCamera();
+                CameraMan cameraMan = simpleScene.getCameraMan();
 
                 switch (event.getCode()) {
                     case L:
-                        camera.lookAtTarget();
+                        cameraMan.faceTarget();
                         break;
                     case F:
-                        camera.moveForward(3);
+                        cameraMan.moveForward(3);
                         break;
                     case B:
-                        camera.moveForward(-3);
+                        cameraMan.moveForward(-3);
                         break;
                     case UP:
-                        camera.moveUp(3);
+                        cameraMan.moveUp(3);
                         break;
                     case DOWN:
-                        camera.moveUp(-3);
+                        cameraMan.moveUp(-3);
                         break;
                     case LEFT:
-                        camera.moveRight(-3);
+                        cameraMan.moveRight(-3);
                         break;
                     case RIGHT:
-                        camera.moveRight(3);
+                        cameraMan.moveRight(3);
                         break;
                     case O:
-                        camera.reset();
+                        cameraMan.reset();
                         break;
                     case R:
-                        camera.removeTarget();
+                        cameraMan.removeTarget();
                         break;
+                    case P:
+                        cameraMan.setPerspective(!cameraMan.hasPerspectiveCamera());
+                        break;
+                        
                 }
 
                 event.consume();
@@ -177,16 +180,16 @@ public class Simple3D extends Application {
         });
     }
 
-    private void setMouseEvents(final SubScene scene) {
-        final SimpleCamera camera = (SimpleCamera) scene.getCamera();
+    private void setMouseEvents(final SimpleScene simpleScene) {
+        final CameraMan cameraMan = simpleScene.getCameraMan();
         //handles mouse scrolling
-        scene.setOnScroll(
+        simpleScene.setOnScroll(
                 new EventHandler<ScrollEvent>() {
             @Override
             public void handle(ScrollEvent event) {
                 double zoomFactor = 1.05;
                 double deltaY = event.getDeltaY();
-                camera.moveForward(deltaY);
+                cameraMan.moveForward(deltaY);
                 event.consume();
             }
         });
@@ -203,8 +206,8 @@ public class Simple3D extends Application {
                         System.out.println("MouseX: " + mouseXNew + ", MouseY: " + mouseYNew);
                         double dx = mouseXNew - mouseXOld;
                         double dy = mouseYNew - mouseYOld;
-                        camera.xRotate.setAngle(camera.xRotate.getAngle() - dy / 5);
-                        camera.yRotate.setAngle(camera.yRotate.getAngle() + dx / 5);
+                        cameraMan.xRotate.setAngle(cameraMan.xRotate.getAngle() - dy / 5);
+                        cameraMan.yRotate.setAngle(cameraMan.yRotate.getAngle() + dx / 5);
                     }
                     mouseXOld = mouseXNew;
                     mouseYOld = mouseYNew;
@@ -212,8 +215,8 @@ public class Simple3D extends Application {
                 } else if (event.getEventType() == MouseEvent.MOUSE_CLICKED) {
                     Node selectedNode = event.getPickResult().getIntersectedNode();
                     if (selectedNode != null) {
-                        camera.setTarget(selectedNode.getTranslateX(), selectedNode.getTranslateY(), selectedNode.getTranslateZ());
-                        camera.lookAtTarget();
+                        cameraMan.setTarget(selectedNode.getTranslateX(), selectedNode.getTranslateY(), selectedNode.getTranslateZ());
+                        cameraMan.faceTarget();
                     }
                 } else if (event.getEventType() == MouseEvent.MOUSE_ENTERED_TARGET && 8 == 9) {
                     Node selectedNode = event.getPickResult().getIntersectedNode();
@@ -252,13 +255,13 @@ public class Simple3D extends Application {
 //                    gc.strokeRect(bounds.getMaxX(), bounds.getMaxY(), bounds.getWidth(), bounds.getHeight());
 
                 } else if (event.getEventType() == MouseEvent.MOUSE_MOVED) {
-                    scene.requestFocus();
+                    simpleScene.requestFocus();
 
                 }
             }
         };
 
-        scene.addEventHandler(MouseEvent.ANY, mouseEventHandler);
+        simpleScene.addEventHandler(MouseEvent.ANY, mouseEventHandler);
     }
 }
 
