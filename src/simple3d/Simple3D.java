@@ -16,6 +16,8 @@ import javafx.scene.PointLight;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Control;
+import javafx.scene.control.Label;
 import javafx.scene.control.ToolBar;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -28,6 +30,7 @@ import javafx.scene.shape.CullFace;
 import javafx.scene.shape.DrawMode;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
+import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 import simpleobj.ObjModelXML;
 import simpleobj.SimpleObj;
@@ -35,14 +38,29 @@ import simpleobj.SimpleObj;
 //http://www.developer.com/java/data/3d-graphics-in-javafx.html
 public class Simple3D extends Application {
 
+    private static Simple3D applicationInstance;
     private double mouseXOld = 0;
     private double mouseYOld = 0;
     private Group root;
+    private SimpleObj pyramid;
+
+    private Stage stage;
+    private static boolean testMode;
+    private SimpleScene simpleScene;
+    
+    public static void startTestMode() {
+        testMode = true;
+        Simple3D.main(new String[0]);
+    }
+
+    public void show() {
+        this.stage.show();
+    }
 
     @Override
     public void start(Stage primaryStage) {
         //TriangleMesh pyramidMesh = new TriangleMesh();
-        SimpleObj pyramid = null;
+        this.pyramid = null;
         try {
             pyramid = ObjModelXML.read("src\\simple3d\\Suzanne.xml").toSimpleObj();
         } catch (Exception ex) {
@@ -82,6 +100,7 @@ public class Simple3D extends Application {
         checkBox.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                System.out.println("x,y: " + checkBox.localToScreen(checkBox.getLayoutBounds().getMinX(), checkBox.getLayoutBounds().getMinY()).toString());
                 //pyramid.setDrawMode(checkBox.isSelected() ? DrawMode.LINE : DrawMode.FILL);
             }
         });
@@ -96,7 +115,21 @@ public class Simple3D extends Application {
         primaryStage.setResizable(false);
         primaryStage.setTitle("Simple3D");
         primaryStage.setScene(scene);
-        primaryStage.show();
+        if (Simple3D.testMode) {
+            Simple3D.applicationInstance = this;
+            this.stage = primaryStage;
+            this.simpleScene = simpleScene;
+            System.out.println("application klass: " + this.getClass());
+            final Stage window = new Stage();
+            window.setX(10);
+            window.setY(10);
+            Scene innerScene = new Scene(new Label("Running in test mode"));
+            window.setScene(innerScene);
+            window.show();
+            primaryStage.show();
+        } else {
+            primaryStage.show();
+        }
     }
 
     /**
@@ -109,6 +142,18 @@ public class Simple3D extends Application {
      */
     public static void main(String[] args) {
         launch(args);
+    }
+
+    public static Simple3D getApplicationInstance() {
+        return applicationInstance;
+    }
+
+    public Stage getStage() {
+        return this.stage;
+    }
+    
+    public SimpleScene getSimpleScene() {
+        return this.simpleScene;
     }
 
     private void buildAxes(Group root) {
@@ -172,7 +217,11 @@ public class Simple3D extends Application {
                     case P:
                         cameraMan.setPerspective(!cameraMan.hasPerspectiveCamera());
                         break;
-                        
+                    case K:
+                        pyramid.setRotationAxis(Rotate.Y_AXIS);
+                        pyramid.setRotate(pyramid.getRotate() + 1);
+                        break;
+
                 }
 
                 event.consume();
@@ -248,12 +297,9 @@ public class Simple3D extends Application {
                     light.setTranslateZ(selectedObject.getTranslateZ());
                     root.getChildren().addAll(clone, light);
 
- 
                     //http://stackoverflow.com/questions/28628702/javafx-2d-part-in-3d-application
-
 //                    Bounds bounds = event.getPickResult().getIntersectedNode().getLayoutBounds();
 //                    gc.strokeRect(bounds.getMaxX(), bounds.getMaxY(), bounds.getWidth(), bounds.getHeight());
-
                 } else if (event.getEventType() == MouseEvent.MOUSE_MOVED) {
                     simpleScene.requestFocus();
 

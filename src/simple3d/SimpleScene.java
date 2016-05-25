@@ -7,7 +7,6 @@ package simple3d;
 
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
-import javafx.scene.ParallelCamera;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.SubScene;
 import javafx.scene.paint.Color;

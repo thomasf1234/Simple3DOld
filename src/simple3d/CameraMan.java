@@ -10,7 +10,9 @@ import javafx.scene.Camera;
 import javafx.scene.ParallelCamera;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.SubScene;
+import javafx.scene.image.WritableImage;
 import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Translate;
 
 /**
  *
@@ -28,6 +30,7 @@ public class CameraMan {
     private double y;
     private double z;
     private SubScene scene;
+    private boolean isPerspective;
 
     public CameraMan(SubScene scene) {
         this.scene = scene;
@@ -128,20 +131,40 @@ public class CameraMan {
     }
 
     public void setPerspective(boolean isPerspective) {
-        if (isPerspective) {
+        this.isPerspective = isPerspective;
+        initializeCamera();
+    }
+    
+    public void initializeCamera() {
+      if (hasPerspectiveCamera()) {
             this.camera = new PerspectiveCamera(true);
-            this.camera.setNearClip(0.1);
+            this.camera.setNearClip(0.01);
             this.camera.setFarClip(100000.0);
         } else {
             this.camera = new ParallelCamera();
+            this.camera.setNearClip(0.00001);
+            this.camera.setFarClip(100000000000000000000000.0);
+            this.camera.setScaleX(0.05);
+            this.camera.setScaleY(0.05);
+            //this.camera.setScaleZ(0.01);
+            this.camera.getTransforms().add(new Translate(-300, -200, 0));
         }
 
         this.camera.getTransforms().addAll(this.xRotate, this.yRotate);
         this.scene.setCamera(this.camera);
-        setCameraPosition();
+        setCameraPosition();    
     }
     
     public boolean hasPerspectiveCamera() {
-      return this.camera instanceof PerspectiveCamera;
+      return this.isPerspective;
+    }
+    
+    public WritableImage render() {
+        return this.scene.snapshot(null, null);
+        
+        //        BufferedImage bImage = SwingFXUtils.fromFXImage(cameraMan.render(), null);
+//        File outputfile = new File("saved.png");
+//        ImageIO.write(bImage, "png", outputfile);
+//       this.runnableApplication.click(.checkbo);
     }
 }
