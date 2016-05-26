@@ -5,6 +5,9 @@
  */
 package simple3d;
 
+import com.sun.javafx.stage.StageHelper;
+import javafx.stage.Stage;
+
 /**
  *
  * @author ad
@@ -36,5 +39,9 @@ public class RunnableApplication implements Runnable {
 
     public Simple3D getApplicationInstance() {
         return Simple3D.getApplicationInstance();
+    }
+    
+    public Stage getPrimaryStage() {
+        return StageHelper.getStages().get(0);
     }
 }

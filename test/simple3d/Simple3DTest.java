@@ -25,11 +25,14 @@ public class Simple3DTest extends BaseTest{
         //if(app.checkbo == null)
         //    fail("failed to get control instance");
         Simple3D app = Simple3D.getApplicationInstance();
-        CameraMan cameraMan = app.getSimpleScene().getCameraMan();
-        cameraMan.moveRight(-15);
+        //CameraMan cameraMan = app.getSimpleScene().getCameraMan();
+        //cameraMan.moveRight(-15);
         //app.getSimpleScene().getRoot().getChildrenUnmodifiable()
         this.qa.moveMouseToSimpleScene();
-//        this.qa.takeScreenshot("a_pic2");
+        Thread.sleep(1000);
+        this.qa.keyClickN(java.awt.event.KeyEvent.VK_RIGHT, 5);
+        Thread.sleep(1000);
+        this.qa.click(app.getSimpleScene().getRoot().getChildrenUnmodifiable().get(0));
 
         Thread.sleep(2000);
         //Platform.setImplicitExit(false);

@@ -119,13 +119,6 @@ public class Simple3D extends Application {
             Simple3D.applicationInstance = this;
             this.stage = primaryStage;
             this.simpleScene = simpleScene;
-            System.out.println("application klass: " + this.getClass());
-            final Stage window = new Stage();
-            window.setX(10);
-            window.setY(10);
-            Scene innerScene = new Scene(new Label("Running in test mode"));
-            window.setScene(innerScene);
-            window.show();
             primaryStage.show();
         } else {
             primaryStage.show();
